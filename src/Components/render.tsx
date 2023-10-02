@@ -97,6 +97,7 @@ type RenderViewProps = {
 	canvasDimensions: { width: number; height: number };
 	hDist: number;
 	vDist: number;
+	persist?: boolean;
 };
 const elSize = (el: Accessor<HTMLElement | undefined>) => {
 	const [size, setSize] = createSignal<{ x: number; y: number } | null>(null);
@@ -124,7 +125,6 @@ export const RenderView = (props: RenderViewProps) => {
 		};
 		return sizes;
 	});
-	const persist = false;
 	// The main render method
 	createEffect(() => {
 		const { x, y } = props.projectile.pos;
@@ -133,7 +133,7 @@ export const RenderView = (props: RenderViewProps) => {
 		const c = el();
 		const ctx = c?.getContext("2d");
 		if (!ctx || !c) return;
-		if (!persist) {
+		if (!props.persist) {
 			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		}
 		ctx.beginPath();
