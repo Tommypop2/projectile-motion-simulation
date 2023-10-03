@@ -1,9 +1,4 @@
-import {
-	createSignal,
-	type Component,
-	createEffect,
-	on,
-} from "solid-js";
+import { createSignal, type Component, createEffect, on } from "solid-js";
 import { Point, Projectile, RenderView, Velocity } from "./Components/render";
 
 const App: Component = () => {
@@ -30,6 +25,9 @@ const App: Component = () => {
 				canvasDimensions={{ width: 1500, height: 900 }}
 				persist={persist()}
 			/>
+			<div>
+				Position: ({proj.pos.x.toFixed(2)}, {proj.pos.y.toFixed(2)})
+			</div>
 		</div>
 	);
 };

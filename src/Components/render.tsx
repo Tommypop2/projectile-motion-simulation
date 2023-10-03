@@ -55,6 +55,7 @@ export class Projectile {
 	pos: Point;
 	velocity: Velocity;
 	opts?: Opts;
+	vLossCol: number = 0.2;
 	constructor(pos: Point, v: Velocity, opts?: Opts) {
 		this.pos = pos;
 		this.velocity = v;
@@ -149,11 +150,23 @@ export const RenderView = (props: RenderViewProps) => {
 	}, interval * 1000);
 	createEffect(
 		on(
-			() => props.projectile.pos.y,
-			(y) => {
+			() => [props.projectile.pos.x, props.projectile.pos.y],
+			([x, y]) => {
 				if (!y) return;
-				if (y <= 0) {
-					props.projectile.velocity = new Velocity(-30, 90);
+				if (!x) return;
+				const sF = 1 - props.projectile.vLossCol;
+				if (y <= 0 || y >= 400) {
+					props.projectile.velocity = new Velocity(
+						sF * props.projectile.velocity.x,
+						sF * -props.projectile.velocity.y
+					);
+					return;
+				}
+				if (x <= 0 || x >= 400) {
+					props.projectile.velocity = new Velocity(
+						sF * -props.projectile.velocity.x,
+						sF * props.projectile.velocity.y
+					);
 				}
 			},
 			{ defer: true }
