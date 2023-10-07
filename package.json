@@ -12,11 +12,12 @@
 	"devDependencies": {
 		"solid-devtools": "^0.27.7",
 		"typescript": "^5.2.2",
-		"vite": "^4.4.9",
-		"vite-plugin-solid": "^2.7.0",
-		"unocss": "^0.56.4"
+		"unocss": "^0.56.5",
+		"vite": "^4.4.11",
+		"vite-plugin-solid": "^2.7.0"
 	},
 	"dependencies": {
+		"@solid-primitives/scheduled": "^1.4.1",
 		"solid-js": "^1.7.12"
 	}
 }

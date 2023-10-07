@@ -10,8 +10,13 @@ import {
 	onCleanup,
 	untrack,
 } from "solid-js";
+// Gravity (ms^-2)
 const G = 9.81;
+// Radius (px)
 const r = 50;
+// Mass (kg)
+const m = 1;
+
 /**
  * Point class
  * Both properties are reactive
@@ -55,11 +60,12 @@ export class Projectile {
 	pos: Point;
 	velocity: Velocity;
 	opts?: Opts;
-	vLossCol: number = 0.2;
-	constructor(pos: Point, v: Velocity, opts?: Opts) {
+	c_elasticity: number;
+	constructor(pos: Point, v: Velocity, opts?: Opts, c_elasticity?: number) {
 		this.pos = pos;
 		this.velocity = v;
 		this.opts = opts;
+		this.c_elasticity = c_elasticity ?? 1;
 	}
 	predictVertical() {
 		const u = this.velocity.y;
@@ -148,13 +154,14 @@ export const RenderView = (props: RenderViewProps) => {
 	const i = setInterval(() => {
 		props.projectile.advance(interval);
 	}, interval * 1000);
+	onCleanup(() => clearInterval(i));
 	createEffect(
 		on(
 			() => [props.projectile.pos.x, props.projectile.pos.y],
 			([x, y]) => {
 				if (!y) return;
 				if (!x) return;
-				const sF = 1 - props.projectile.vLossCol;
+				const sF = props.projectile.c_elasticity;
 				if (y <= 0 || y >= 400) {
 					props.projectile.velocity = new Velocity(
 						sF * props.projectile.velocity.x,
@@ -162,7 +169,7 @@ export const RenderView = (props: RenderViewProps) => {
 					);
 					return;
 				}
-				if (x <= 0 || x >= 400) {
+				if (x <= 0 || x >= 600) {
 					props.projectile.velocity = new Velocity(
 						sF * -props.projectile.velocity.x,
 						sF * props.projectile.velocity.y
