@@ -42,11 +42,23 @@ export class Point {
 	}
 }
 export class Velocity {
-	x: number;
-	y: number;
+	private sX: Signal<number>;
+	private sY: Signal<number>;
 	constructor(x: number, y: number) {
-		this.x = x;
-		this.y = y;
+		this.sX = createSignal(x);
+		this.sY = createSignal(y);
+	}
+	get x() {
+		return this.sX[0]();
+	}
+	get y() {
+		return this.sY[0]();
+	}
+	set y(a) {
+		this.sY[1](a);
+	}
+	set x(a) {
+		this.sX[1](a);
 	}
 	get magnitude() {
 		return Math.sqrt(this.x ** 2 + this.y ** 2);
@@ -68,15 +80,19 @@ export class Projectile {
 		this.c_elasticity = c_elasticity ?? 1;
 	}
 	predictVertical() {
-		const u = this.velocity.y;
-		const s = u ** 2 / (2 * G);
-		return untrack(() => this.pos.y) + s;
+		return untrack(() => {
+			const u = this.velocity.y;
+			const s = u ** 2 / (2 * G);
+			return this.pos.y + s;
+		});
 	}
 	predictHorizontal() {
-		const s = this.predictVertical();
-		const t = Math.sqrt((2 * s) / G);
-		const total = 2 * t;
-		return total * this.velocity.x;
+		return untrack(() => {
+			const s = this.predictVertical();
+			const t = Math.sqrt((2 * s) / G);
+			const total = 2 * t;
+			return total * this.velocity.x;
+		});
 	}
 	/**
 	 * The predicted distances that the projectile will travel
@@ -90,12 +106,14 @@ export class Projectile {
 	 */
 	advance(t: number) {
 		// Assume no velocity loss in the x direction
-		batch(() => {
-			this.pos.x += this.velocity.x * t;
-			const dY = this.velocity.y * t + 0.5 * -G * t ** 2;
-			this.pos.y += dY;
-			const acceleration = -(G * t);
-			this.velocity.y += acceleration;
+		untrack(() => {
+			batch(() => {
+				this.pos.x += this.velocity.x * t;
+				const dY = this.velocity.y * t + 0.5 * -G * t ** 2;
+				this.pos.y += dY;
+				const acceleration = -(G * t);
+				this.velocity.y += acceleration;
+			});
 		});
 	}
 }
@@ -163,17 +181,13 @@ export const RenderView = (props: RenderViewProps) => {
 				if (!x) return;
 				const sF = props.projectile.c_elasticity;
 				if (y <= 0 || y >= 400) {
-					props.projectile.velocity = new Velocity(
-						sF * props.projectile.velocity.x,
-						sF * -props.projectile.velocity.y
-					);
+					props.projectile.velocity.x = sF * props.projectile.velocity.x;
+					props.projectile.velocity.y = sF * -props.projectile.velocity.y;
 					return;
 				}
 				if (x <= 0 || x >= 600) {
-					props.projectile.velocity = new Velocity(
-						sF * -props.projectile.velocity.x,
-						sF * props.projectile.velocity.y
-					);
+					props.projectile.velocity.x = sF * -props.projectile.velocity.x;
+					props.projectile.velocity.y = sF * props.projectile.velocity.y;
 				}
 			},
 			{ defer: true }

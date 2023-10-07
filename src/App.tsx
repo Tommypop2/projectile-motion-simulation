@@ -70,6 +70,10 @@ const App: Component = () => {
 				<span>
 					(x, y): ({proj.pos.x.toFixed(2)}, {proj.pos.y.toFixed(2)})
 				</span>
+				<span>
+					Velocity (x,y): ({proj.velocity.x.toFixed(2)},{" "}
+					{proj.velocity.y.toFixed(2)})
+				</span>
 			</div>
 		</div>
 	);
